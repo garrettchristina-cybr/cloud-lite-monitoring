@@ -24,3 +24,5 @@ This project demonstrates real-world security monitoring using only free, open-s
 git clone https://github.com/garrettchristina-cybr/cloud-lite-monitoring.git
 cd cloud-lite-monitoring
 docker compose up -d --build
+
+License: MIT (see LICENSE)
