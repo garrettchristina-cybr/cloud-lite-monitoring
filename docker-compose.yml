@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  mariadb:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks: [stack]
+
+  php-apache:
+    build: ./apache-php
+    restart: unless-stopped
+    depends_on: [mariadb]
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=mariadb
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_PASSWORD}
+    volumes:
+      - ./apache-php/src:/var/www/html
+      - ./apache-php/apache-logs:/var/log/apache2
+    networks: [stack]
+
+  loki:
+    image: grafana/loki:2.9.8
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+    networks: [stack]
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ./apache-php/apache-logs:/logs/apache:ro
+      - ./apache-php/src/logs:/logs/app:ro
+    networks: [stack]
+    depends_on: [loki]
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    networks: [stack]
+    depends_on: [loki]
+
+volumes:
+  db_data:
+  apache_logs:
+  loki_data:
+  grafana_data:
+
+networks:
+  stack:
