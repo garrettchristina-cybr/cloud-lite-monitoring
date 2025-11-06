@@ -73,18 +73,22 @@ Before running the project, ensure you have the following installed and configur
 
 ### 🔑 Environment Variables (optional)
 
-To use AI summaries and Discord notifications, copy `.env.example` into `.env`:
+To use AI summaries and Discord notifications, copy the example file into `.env` and edit it with your keys.
 
-```bash
+**Windows (PowerShell):**
+```powershell
+Copy-Item ai\.env.example ai\.env
+notepad ai\.env   # edit with your keys (do NOT commit)
+
+**macOS / Linux:**
 cp ai/.env.example ai/.env
+nano ai/.env      # edit with your keys (do NOT commit)
 
-Then edit it with your credentials:
-
+Fill values (example):
 OPENAI_API_KEY=sk-yourkeyhere
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 LOKI_URL=http://localhost:3100
-
-(Never commit your .env file — it’s ignored via .gitignore.)
+Important: ai/.env is listed in .gitignore and must not be committed. Keep your real API keys private.
 
 ---
 
