@@ -1,0 +1,20 @@
+# Python venv
+.venv/
+
+# AI secrets / local state
+ai/.env
+ai/model_state.json
+
+# App caches & logs
+apache-php/src/geo_cache.json
+apache-php/src/logs/
+apache-php/apache-logs/
+
+# Backups / artifacts
+backups/
+*.tgz
+*.zip
+
+# OS/editor junk
+.DS_Store
+Thumbs.db

@@ -1,12 +1,13 @@
 FROM php:8.2-apache
 
-# Install PHP extensions for MySQL
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# system deps for extensions (curl is usually present, but this ensures headers)
+RUN apt-get update && apt-get install -y libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*
 
-# Enable useful Apache modules
+# PHP extensions
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN docker-php-ext-install curl || true  # no-op if already enabled
+
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
-
-# Ensure Apache log dir exists and is writable
 RUN mkdir -p /var/log/apache2 && chown -R www-data:www-data /var/log/apache2

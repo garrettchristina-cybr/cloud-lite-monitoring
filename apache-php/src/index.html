@@ -1,17 +1,223 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Cloud-Lite Monitoring — Demo App</title>
-  </head>
-  <body>
-    <h1>Demo Login</h1>
-    <form method="POST" action="/login.php">
-      <label>Username: <input type="text" name="username" required></label><br>
-      <label>Password: <input type="password" name="password" required></label><br>
-      <button type="submit">Sign in</button>
-    </form>
-    <p>Use username <code>admin</code> and password <code>password</code> for a success.
-       Anything else will log a failed login (good for testing).</p>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MLG Esports — Cloud-Lite Demo</title>
+  <meta name="description" content="Esports-themed demo site for Cloud-Lite Monitoring (Loki + Grafana + Discord + AI)." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .glass { background: rgba(2, 6, 23, 0.65); backdrop-filter: blur(6px); }
+    .card { border:1px solid rgba(100,116,139,.25); border-radius:1rem; padding:1.2rem; background:rgba(15,23,42,.75); }
+    .badge { display:inline-flex; align-items:center; padding:.15rem .5rem; font-size:.7rem; border-radius:9999px; border:1px solid rgba(100,116,139,.35); }
+    .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .hero {
+      background-image: linear-gradient(rgba(2,6,23,.7), rgba(2,6,23,.85)),
+                         url('/static/halo-spartan.jpg');
+      background-size: cover; background-position: center;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+
+  <!-- top bar -->
+  <header class="border-b border-slate-800/60">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="/static/mlg-symbol.jpg" alt="MLG Logo" class="w-10 h-10 object-contain rounded-lg shadow-soft">
+        <div>
+          <div class="text-lg font-semibold tracking-tight">MLG Esports</div>
+          <div class="text-xs text-slate-400 -mt-0.5">Cloud-Lite monitoring demo</div>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+        <a href="#" class="hover:text-white">Home</a>
+        <a href="#schedule" class="hover:text-white">Schedule</a>
+        <a href="#news" class="hover:text-white">News</a>
+        <a href="#admin" class="hover:text-white">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="max-w-6xl mx-auto px-4 py-10 md:py-14">
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- left: event info -->
+        <div class="md:col-span-2 glass rounded-2xl p-6 shadow-soft">
+          <div class="flex items-start justify-between gap-2">
+            <h1 class="text-2xl md:text-3xl font-semibold">Major League Gaming — Invitational</h1>
+            <span class="badge text-emerald-300">status: online</span>
+          </div>
+          <p class="text-slate-300 mt-3 max-w-2xl">
+            Esports site for demo only. While this “event” runs, our backend collects app logs and raises alerts
+            in Grafana, posts to Discord, and generates an AI summary.
+          </p>
+
+          <!-- featured teams (your logos) -->
+          <div class="mt-5">
+            <div class="text-xs uppercase text-slate-400 mb-2">Featured teams</div>
+            <div class="grid grid-cols-4 gap-3">
+              <div class="card flex items-center justify-center">
+                <img src="/static/logo-finalboss.jpg" alt="Final Boss" class="h-14 object-contain">
+              </div>
+              <div class="card flex items-center justify-center">
+                <img src="/static/logo-str8.jpg" alt="Str8 Rippin" class="h-14 object-contain">
+              </div>
+              <div class="card flex items-center justify-center">
+                <img src="/static/logo-classic.jpg" alt="Classic" class="h-14 object-contain">
+              </div>
+              <div class="card flex items-center justify-center">
+                <img src="/static/logo-instinct.jpg" alt="Instinct" class="h-14 object-contain">
+              </div>
+            </div>
+          </div>
+
+          <!-- runbook -->
+          <div class="mt-6 card">
+            <div class="flex items-center justify-between">
+              <h3 class="font-medium">Demo runbook (CLI)</h3>
+              <button onclick="copyRunbook()" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded border border-slate-700">copy</button>
+            </div>
+            <pre id="runbook" class="mt-2 text-xs text-slate-300 overflow-auto leading-6">
+# Start or rebuild
+docker compose up -d --build
+
+# Full demo (brute + 5xx + AI summary)
+powershell -ExecutionPolicy Bypass -File .\scripts\demo-all.ps1
+
+# Brute force only (customize IP/Count/Delay)
+powershell -ExecutionPolicy Bypass -File .\scripts\demo-bruteforce.ps1 -Ip "203.0.113.50" -Count 12 -DelayMs 500
+
+# HTTP 5xx demo only
+powershell -ExecutionPolicy Bypass -File .\scripts\demo-5xx.ps1
+
+# AI summary to Discord + summary.txt
+python ai/ai_summarize.py
+            </pre>
+          </div>
+        </div>
+
+        <!-- right: admin/telemetry -->
+        <aside id="admin" class="card">
+          <div class="flex items-center justify-between">
+            <h3 class="font-medium">Admin (read-only)</h3>
+            <a href="http://localhost:3000" target="_blank" class="text-xs text-blue-400 hover:text-blue-300">Open Grafana →</a>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-xs uppercase text-slate-400">Last AI summary</div>
+            <pre id="last-summary" class="mt-2 bg-slate-900/60 border border-slate-800 rounded-lg p-3 h-40 overflow-auto text-xs">Loading…</pre>
+            <div class="mt-2">
+              <a href="/summary.txt" target="_blank" class="text-xs text-slate-300 underline hover:text-white">open summary.txt</a>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-xs uppercase text-slate-400">Recent app events (tail)</div>
+            <pre id="tail" class="mt-2 bg-slate-900/60 border border-slate-800 rounded-lg p-3 h-40 overflow-auto text-[11px] leading-5">Loading…</pre>
+            <div class="mt-2 flex items-center gap-3 text-xs text-slate-400">
+              <span>Source: <code>/logs/app_events.log</code></span>
+              <a href="/tail.php" target="_blank" class="underline hover:text-white">open tail</a>
+            </div>
+          </div>
+
+          <div class="mt-4 text-xs text-slate-400">
+            Alerts go to Discord (channel: grafana-alerts). AI summaries can post to a separate channel.
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- schedule -->
+  <section id="schedule" class="py-10 border-t border-slate-800/60">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-xl font-semibold">Upcoming schedule</h2>
+      <div class="mt-4 grid md:grid-cols-3 gap-4">
+        <div class="card">
+          <div class="text-sm text-slate-300">Sat — 7:00 PM</div>
+          <div class="mt-1 text-lg">Final Boss vs Str8 Rippin</div>
+          <div class="text-slate-400 text-sm">Bo3 • Online Showcase</div>
+        </div>
+        <div class="card">
+          <div class="text-sm text-slate-300">Sun — 3:00 PM</div>
+          <div class="mt-1 text-lg">Classic vs Instinct</div>
+          <div class="text-slate-400 text-sm">Bo3 • Online Showcase</div>
+        </div>
+        <div class="card">
+          <div class="text-sm text-slate-300">Sun — 6:00 PM</div>
+          <div class="mt-1 text-lg">Grand Final</div>
+          <div class="text-slate-400 text-sm">Bo5 • Championship</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- news -->
+  <section id="news" class="py-10 border-t border-slate-800/60">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-xl font-semibold">News</h2>
+      <div class="mt-4 grid md:grid-cols-3 gap-4">
+        <article class="card">
+          <div class="text-sm text-slate-300">Feature</div>
+          <h3 class="mt-1 text-lg">Cloud-Lite monitoring goes live</h3>
+          <p class="mt-2 text-slate-300 text-sm">Real-time alerts, AI summaries, and clean dashboards back the invitational.</p>
+        </article>
+        <article class="card">
+          <div class="text-sm text-slate-300">Update</div>
+          <h3 class="mt-1 text-lg">Match integrity checks</h3>
+          <p class="mt-2 text-slate-300 text-sm">Failed login bursts & 5xx spikes are auto-flagged and posted to Discord.</p>
+        </article>
+        <article class="card">
+          <div class="text-sm text-slate-300">Highlight</div>
+          <h3 class="mt-1 text-lg">Community stream overlays</h3>
+          <p class="mt-2 text-slate-300 text-sm">Simple, clean overlays that match the site branding.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-8 border-t border-slate-800/60">
+    <div class="max-w-6xl mx-auto px-4 text-slate-400 text-sm">
+      © <span id="year"></span> MLG Esports — demo site for Cloud-Lite Monitoring
+    </div>
+  </footer>
+
+  <script>
+    // footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // copy runbook helper
+    function copyRunbook(){
+      const text = document.getElementById('runbook').innerText;
+      navigator.clipboard.writeText(text).then(()=> alert('Runbook copied to clipboard.'));
+    }
+
+    // polling for summary and tail (read-only)
+    async function refreshSummary(){
+      try{
+        const r = await fetch('/summary.txt', {cache:'no-store'});
+        if (!r.ok) throw new Error('no summary');
+        const t = await r.text();
+        document.getElementById('last-summary').textContent = t || 'No summary yet.';
+      }catch(e){
+        document.getElementById('last-summary').textContent = 'No summary yet.';
+      }
+    }
+    async function refreshTail(){
+      try{
+        const r = await fetch('/tail.php?lines=200', {cache:'no-store'});
+        if (!r.ok) throw new Error('no tail');
+        const t = await r.text();
+        document.getElementById('tail').textContent = t || 'No events yet.';
+      }catch(e){
+        document.getElementById('tail').textContent = 'No events yet.';
+      }
+    }
+    refreshSummary(); refreshTail();
+    setInterval(refreshSummary, 5000);
+    setInterval(refreshTail, 3000);
+  </script>
+</body>
 </html>

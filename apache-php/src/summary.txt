@@ -1,0 +1,8 @@
+- **Total Failed Logins**: 38 attempts recorded, indicating potential brute-force activity.
+- **5xx Errors**: 17 server errors logged, suggesting possible application issues.
+- **Notable IPs**: 
+  - **52.95.110.1**: 11 failed login attempts.
+  - **8.8.8.8**: 12 failed login attempts, originating from Mountain View, US.
+- **Geographical Distribution**: Activity primarily from the US, with multiple failed attempts from IPs with no specific geo-location.
+  
+**Risk Verdict**: High risk of brute-force attacks and application errors detected.
