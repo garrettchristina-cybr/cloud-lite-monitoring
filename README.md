@@ -36,8 +36,12 @@ This project is ideal for cybersecurity students, SOC analyst training, and hand
         │ alerts → Discord Webhook
         ▼
 [ AI Summarizer (Python + OpenAI API) ]
+```
 
-⚙️ Prerequisites
+---
+
+## ⚙️ Prerequisites
+
 | Tool                 | Version               | Notes                       |
 | -------------------- | --------------------- | --------------------------- |
 | Docker Desktop       | 4.x+                  | Compose v2 enabled          |
@@ -46,7 +50,11 @@ This project is ideal for cybersecurity students, SOC analyst training, and hand
 | OpenAI account       | optional              | required for GPT summaries  |
 | Discord Webhook      | optional              | for alert notifications     |
 
-📂 Project Structure
+---
+
+## 📂 Project Structure
+
+```
 cloud-lite-monitoring/
 ├─ apache-php/
 │  ├─ src/            → web app source (index.html, login.php, logs/)
@@ -68,129 +76,209 @@ cloud-lite-monitoring/
 ├─ docker-compose.yml
 ├─ .gitignore / .gitattributes
 └─ README.md
+```
 
-🧠 AI Summarizer
-What it does
-* Pulls the last 15 minutes of logs from Loki
-* Analyzes patterns (failed logins, 5xx spikes, IP origins)
-* If OpenAI API key is configured, sends the data to gpt-4o-mini
-* Posts an “AI Log Summary” to Discord and saves it as summary.txt
-Example output:
-**AI Log Summary**
+---
+
+## 🧠 AI Summarizer
+
+### What it does
+
+* Pulls the last 15 minutes of logs from Loki  
+* Analyzes patterns (failed logins, 5xx spikes, IP origins)  
+* If OpenAI API key is configured, sends the data to gpt-4o-mini  
+* Posts an “AI Log Summary” to Discord and saves it as summary.txt  
+
+### Example output
+
+```
+AI Log Summary
 Window: last 15 minutes
 - Failed logins: 12 (Top IPs: 8.8.8.8 (12))
 - Top countries: US (12)
 - HTTP 5xx lines: 3
 Assessment: Brute-force activity likely; minor 5xx spike from form errors.
+```
 
-🧪 Quick Start
-1️⃣ Clone & enter
+---
+
+## 🧪 Quick Start
+
+### 1️⃣ Clone & enter
+
+```sh
 git clone https://github.com/garrettchristina-cybr/cloud-lite-monitoring.git
 cd cloud-lite-monitoring
+```
 
-2️⃣ Configure environment
+### 2️⃣ Configure environment
+
 Copy the example and add your keys:
-cp ai/.env.example ai/.env
 
-Edit ai/.env:
+```sh
+cp ai/.env.example ai/.env
+```
+
+Edit `ai/.env`:
+
+```
 OPENAI_API_KEY=sk-...
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 LOKI_URL=http://localhost:3100
+```
 
-3️⃣ Launch the stack
+### 3️⃣ Launch the stack
+
+```sh
 .\scripts\start.ps1
+```
 
 Wait until both:
-http://localhost:8080
- → demo web app
 
-http://localhost:3000
- → Grafana (admin / admin)
+- http://localhost:8080 → demo web app  
+- http://localhost:3000 → Grafana (admin / admin)
 
- 4️⃣ Run a demo attack
- .\scripts\demo-bruteforce.ps1
-# or run both:
+### 4️⃣ Run a demo attack
+
+```sh
+.\scripts\demo-bruteforce.ps1
+```
+
+or run everything:
+
+```sh
 .\scripts\demo-all.ps1
+```
 
 You should see:
-* Alerts firing in Grafana
-* Discord notifications
-* AI summary auto-posted
 
-5️⃣ Stop & clean
+* Alerts firing in Grafana  
+* Discord notifications  
+* AI summary auto-posted  
+
+### 5️⃣ Stop & clean
+
+```sh
 .\scripts\clean-logs.ps1
 .\scripts\stop.ps1
+```
 
-🖥️ Grafana Dashboards
-Panels
-* Failed logins per minute (by IP)
-* HTTP 5xx spikes
-* AI Summary (Text Panel)
-* (optional) GeoMap – plot IP sources by latitude/longitude
+---
 
-Alerts
-* Brute Force Detection → triggers ≥ 10 failed logins / 5 min
-* HTTP 5xx Spike → triggers ≥ 10 errors / min 
-    Both forward to your Discord webhook.
+## 🖥️ Grafana Dashboards
 
-🎮 Web App Theme
-* Styled with Tailwind CSS
-* Background: mlg-bg-halo.jpg
-* Team logos: Classic / Final Boss / Instinct / Str8 Rippin
-* Designed to simulate a gaming event portal under active security monitoring.
+### Panels
 
-🤖 Local Machine Learning (optional)
-The summarizer stores basic anomaly state in:
+* Failed logins per minute (by IP)  
+* HTTP 5xx spikes  
+* AI Summary (Text Panel)  
+* (optional) GeoMap – plot IP sources by latitude/longitude  
+
+### Alerts
+
+* **Brute Force Detection** → triggers ≥ 10 failed logins / 5 min  
+* **HTTP 5xx Spike** → triggers ≥ 10 errors / min  
+
+Both forward to your Discord webhook.
+
+---
+
+## 🎮 Web App Theme
+
+* Tailwind CSS  
+* Background: `mlg-bg-halo.jpg`  
+* Team logos: Classic / Final Boss / Instinct / Str8 Rippin  
+* Designed as an eSports event portal under security monitoring.
+
+---
+
+## 🤖 Local Machine Learning (optional)
+
+Stores anomaly-tracking state in:
+
+```
 ai/model_state.json
+```
 
-This lets the AI detect “new highs” in login or 5xx patterns over time, providing context such as:
-“Unusual spike: failed logins +50% vs previous average.”
+This helps detect:
 
-Reset with:
+> “New high: failed logins +50% vs previous average.”
+
+Reset it:
+
+```sh
 python ai/reset_model_state.py
+```
 
-💬 Discord Integration
-Alerts and summaries are formatted using embeds with color codes:
-* 🟥 Red → Brute force or 5xx error
-* 🟨 Yellow → Suspicious but non-critical
-* 🟩 Green → Normal operations
-To disable Discord, simply leave DISCORD_WEBHOOK_URL empty in .env.
+---
 
-🧰 Maintenance Scripts
+## 💬 Discord Integration
+
+Color-coded embeds:
+
+* 🟥 Red → Brute force / 5xx  
+* 🟨 Yellow → Suspicious  
+* 🟩 Green → Normal  
+
+Disable by leaving webhook empty.
+
+---
+
+## 🧰 Maintenance Scripts
+
 | Script                | Description                                           |
 | --------------------- | ----------------------------------------------------- |
-| `start.ps1`           | Build + start all containers; wait for ready state    |
+| `start.ps1`           | Build + start all containers                          |
 | `stop.ps1`            | Gracefully stop containers                            |
-| `clean-logs.ps1`      | Truncate Apache and app logs while Promtail is paused |
+| `clean-logs.ps1`      | Clear logs while Promtail paused                      |
 | `demo-bruteforce.ps1` | Simulate 12 failed logins from a test IP              |
 | `demo-5xx.ps1`        | Trigger HTTP 5xx spike                                |
 | `demo-all.ps1`        | Run all demos + AI summary                            |
-| `ai-summary.ps1`      | Generate and post AI summary manually                 |
+| `ai-summary.ps1`      | Generate AI summary manually                          |
 
-📊 Data Retention
-* Loki stores logs on local volume (loki_data).
-* Promtail positions are in promtail_positions.
-* You can wipe them anytime via:
+---
+
+## 📊 Data Retention
+
+Volumes:
+
+* `loki_data`  
+* `promtail_positions`
+
+Wipe:
+
+```sh
 docker volume rm cloud-lite-monitoring_loki_data cloud-lite-monitoring_promtail_positions
+```
 
-🔒 Security & Secrets
-* .env files, logs, and caches are ignored via .gitignore
-* Always use example templates for reproducibility
-* API keys / webhooks are never committed
+---
 
-🧾 License
+## 🔒 Security & Secrets
+
+* `.env` files ignored  
+* Use `.env.example` templates  
+* Never commit API keys  
+
+---
+
+## 🧾 License
+
 MIT License
- — free for educational and demo use.
 
-🙌 Credits
+---
 
-* Garrett Christina — Project lead / developer
-* OpenAI GPT-4o mini — AI log summarizer
-* Grafana Labs, Loki, Promtail — monitoring stack
-* MLG Team Logos & Halo Assets used for educational visual demo purposes only
+## 🙌 Credits
 
-🧠 Future Ideas
-* Full SIEM-style Web UI built in React
-* Threat intelligence integration
-* Expanded ML model for log anomaly scoring
-* Multi-user dashboards and API token auth
+* Garrett Christina — Developer  
+* OpenAI GPT-4o mini — AI summarizer  
+* Grafana Labs — Loki/Promtail/Grafana  
+* MLG & Halo assets for educational demo only  
+
+---
+
+## 🧠 Future Ideas
+
+* React SIEM-style UI  
+* TI (Threat Intelligence) ingestion  
+* ML anomaly scoring upgrade  
+* Multi-user dashboards + token auth  
